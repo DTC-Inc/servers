@@ -20,15 +20,16 @@ $errorCatch = $true
 while ( ($errorCatch -eq $true ) {
 
     #Read input of user on what type of server we're configuring
-    Read-Host $input = Read-Host -prompt "What type of server are we configuring? (T140, T340, T440): "
+    $input = Read-Host -prompt "What type of server are we configuring? (T140, T340, T440): "
+    echo "You chose $input"
 
-    if ( $input -is "T140" -or $input -is "T340" ){
+    if ( $input -eq "T140" -or $input -eq "T340" ){
     
-        if ( $input -is "T140" ){
+        if ( $input -eq "T140" ){
             & "$psScriptRoot\T140\deploy-networking.ps1"
             $errorCatch = $false
         }
-        if ( $input -is "T340" ){
+        if ( $input -eq "T340" ){
             & "$psScriptRoot\T340\deploy-networking.ps1"
             $errorCatch = $false
         }    
