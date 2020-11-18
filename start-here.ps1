@@ -17,7 +17,7 @@ Expand-Archive -path "$env:windir\temp\servers.zip" -destinationPath "$env:syste
 $errorCatch = $true
 
 #Start automation scripts
-while ( ($errorCatch -eq $true ) {
+while ($errorCatch -eq $true ) {
 
     #Read input of user on what type of server we're configuring
     $input = Read-Host -prompt "What type of server are we configuring? (T140, T340, T440): "
