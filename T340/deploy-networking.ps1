@@ -3,7 +3,7 @@ Get-VMNetworkadapter -managementOS  | Where-Object -property "name" -notlike "Co
 Get-VMSwitch | Where-Object -property name -notlike "Default Switch" | Remove-VMSwitch -force
 
 #Rename host to HV0 or HV1 etc.. Please check Automate if the name is available in the client
-$newName = Read-Host -prompt "Input the DTCBSURE Appliance Name (HV0, HV1, etc...): "
+$newName = Read-Host -prompt "Input the server name (HV0, HV1, etc...)"
 Rename-Computer -newName $newName
 
 #Create SET team SET1 and Management vNIC. Also sets load balancing algorithm to dynamic
