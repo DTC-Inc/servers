@@ -9,9 +9,9 @@ if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 
 
 #Update to latest master
-Remove-Item -path $env:windir\temp\dtcbsure-bdr.zip -force -confirm:$false
-wget "https://codeload.github.com/DTC-Inc/dtcbsure-bdr-appliance/zip/main" -outFile $env:windir\temp\dtcbsure-bdr.zip
-Expand-Archive -path "$env:windir\temp\dtcbsure-bdr.zip" -destinationPath "$env:systemdrive\dtc" -force
+Remove-Item -path $env:windir\temp\servers.zip -force -confirm:$false
+wget "https://codeload.github.com/DTC-Inc/servers/zip/main" -outFile $env:windir\temp\servers.zip
+Expand-Archive -path "$env:windir\temp\servers.zip" -destinationPath "$env:systemdrive\dtc" -force
 
 #Init $errorCatch variable
 $errorCatch = $true
