@@ -45,7 +45,7 @@ while ($errorCatch -eq $true ) {
         $input = n
     }
     
-    if ( $input -ne y or $input -ne n ){
+    if ( $input -ne "y" or $input -ne "n" ){
     
         if ( $input -eq "y" ){
             & "$psScriptRoot\deploy-hyperv.ps1"
