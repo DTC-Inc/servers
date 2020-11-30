@@ -2,6 +2,19 @@
 $errorCatch = $true
 
 # Start automation scripts
+# Expand OS partition
+$maxSize = (Get-PartitionSupportedSize -driveLetter C).sizeMax
+Resize-Partition -driveLetter C -size $maxSize
+
+# Create data1 partition
+$dataDisk = Get-Disk | Where -property partitionStyle -eq RAW | Select -expandProperty number
+Initialze-Disk -partitionStyle GPT -number $dataDisk
+New-Partition -DiskNumber $dataDisk -useMaximumSize -driveLetter D
+Format-Volume -fileSystem NTFS -driveLetter D
+Get-Volume | Where -property driveLetter -eq D | Set-Volume -newFileSystemLabel data1
+
+
+
 while ($errorCatch -eq $true ) {
 
     #Read input of user on what type of server we're configuring
