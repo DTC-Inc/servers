@@ -61,7 +61,7 @@ while ($errorCatch -eq $true ) {
                 
             }
             
-            if ( $inputServer -eq "T140 ) {
+            if ( $inputServer -eq "T140" ) {
                 & "$psScriptRoot\T140\deploy-networking.ps1"
             }
             
