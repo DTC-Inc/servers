@@ -1,7 +1,7 @@
-#Init errorCatch variable
+# Init errorCatch variable
 $errorCatch = $true
 
-#Start automation scripts
+# Start automation scripts
 while ($errorCatch -eq $true ) {
 
     #Read input of user on what type of server we're configuring
@@ -24,6 +24,6 @@ while ($errorCatch -eq $true ) {
     }
 }
 
-#Deploy OpenSSH
+# Deploy OpenSSH
 Write-Host "Deploying OpenSSH"
 & "$psScriptRoot\deploy-openssh.ps1"
