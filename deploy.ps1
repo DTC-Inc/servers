@@ -24,6 +24,6 @@ while ($errorCatch -eq $true ) {
     }
 }
 
-# Deploy OpenSSH
+#Deploy OpenSSH
 Write-Host "Deploying OpenSSH"
 & "$psScriptRoot\deploy-openssh.ps1"
