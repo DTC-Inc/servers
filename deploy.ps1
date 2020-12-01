@@ -14,16 +14,58 @@ Format-Volume -fileSystem NTFS -driveLetter D
 Get-Volume | Where -property driveLetter -eq D | Set-Volume -newFileSystemLabel data1
 
 
+# Server selection
+$errorCatch = $true
+while ($errorCatch -eq $true ) {
 
+    # Read input of user on what type of server we're configuring
+    $inputServer = Read-Host -prompt "What type of server are we configuring? (T140, T340, T440)"
+    Write-Host "You chose $inpuServert."
+
+    if ( $inputServer -eq "T140" -or $inputServer -eq "T340" ){
+        Write-Host "You selected $inputServer."
+        $errorCatch = $false
+        
+    }else {
+        Write-Host "Input not accepted. Try again."
+
+    }
+}
+
+# Disk formatting selection
+$errorCatch = $true
 while ($errorCatch -eq $true ) {
 
     #Read input of user on what type of server we're configuring
-    $inputServer = Read-Host -prompt "What type of server are we configuring? (T140, T340, T440)"
-    Write-Host "You chose $input."
+    $inputBoot = Read-Host -prompt "Does this server have a dedicated boot disk? (y or n)"
+    Write-Host "You chose $inputBoot."
 
-    if ( $inputServer -eq "T140" -or $input -eq "T340" ){
-        Write-Host "You selected $inputServer."
+    if ( $inputBoot -eq "y" -or $inputBoot -eq "n" ){
+        Write-Host "You selected $inputBoot."
         $errorCatch = $false
+        
+        if ( $inputBoot -eq "y" ){
+            # Expand OS partition
+            $maxSize = (Get-PartitionSupportedSize -driveLetter C).sizeMax
+            Resize-Partition -driveLetter C -size $maxSize
+            
+            # Create data1 partition
+            $dataDisk = Get-Disk | Where -property partitionStyle -eq RAW | Select -expandProperty number
+            Initialze-Disk -partitionStyle GPT -number $dataDisk
+            New-Partition -DiskNumber $dataDisk -useMaximumSize -driveLetter D
+            Format-Volume -fileSystem NTFS -driveLetter D
+            Get-Volume | Where -property driveLetter -eq D | Set-Volume -newFileSystemLabel data1
+            
+        }else {
+            # Expand OS partition
+            Resize-Partition -driveLetter C -size 80GB
+            
+            # Create data1 partition
+            New-Partition -DiskNumber 0 -useMaximumSize -driveLetter D
+            Format-Volume -fileSystem NTFS -driveLetter D
+            Get-Volume | Where -property driveLetter -eq D | Set-Volume -newFileSystemLabel data1
+  
+        }
         
     }else {
         Write-Host "Input not accepted. Try again."
@@ -38,16 +80,16 @@ $errorCatch = $true
 while ($errorCatch -eq $true ) {
 
     #Read input of user on what type of server we're configuring
-    $input = Read-Host -prompt "Will this server be a Hyper-V host? (y or n)"
-    echo "You chose $input"
+    $inputHyperv = Read-Host -prompt "Will this server be a Hyper-V host? (y or n)"
+    echo "You chose $inputHyperv"
     if ( $inputServer -eq "T140" ) {
         Write-Host "T140's cannot have Hyper-V role installed."
         $input = n
     }
     
-    if ( $input -ne "y" -or $input -ne "n" ){
+    if ( $inputHyperv -eq "y" -or $inputHyperv -eq "n" ){
     
-        if ( $input -eq "y" ){
+        if ( $inputHyperv -eq "y" ){
             & "$psScriptRoot\deploy-hyperv.ps1"
             
             if ( $inputServer -eq "T340" ) {
@@ -62,7 +104,7 @@ while ($errorCatch -eq $true ) {
             $errorCatch = $false
         }
         
-        if ( $input -eq "n" ){
+        if ( $inputHyperv -eq "n" ){
             Write-Host "Not deploying Hyper-V."
             
             if ( $inputServer -eq "T340" ) {
