@@ -8,3 +8,9 @@ New-VMSwitch -name SET1 -netAdapterName $toTeam -enableEmbeddedTeaming $true
 Rename-VMNetworkAdapter -name SET1 -newName vNIC1 -managementOS
 Set-VMSwitchTeam -name SET1 -loadBalancingAlgorithm dynamic 
 ping 8.8.8.8 -n 30
+
+# Delete scheduled task
+Write-EventLog -messasge "deploy-networking-hyperv: hi I ran on reboot" -LogName System -Source EventLog -EventId 333
+schtasks.exe /delete /f /tn deploy-networking-hyperv
+
+
