@@ -4,18 +4,18 @@ $killScript = Read-Host "Do you want to kill this script? (y or n)"
 
 
 
-if ( $killScript -eq "y" ) {
+if ($killScript -eq "y") {
     exit
 }
 
 # Server selection
 $errorCatch = $true
-while ($errorCatch -eq $true ) {
+while ($errorCatch -eq $true) {
 
     # Read input of user on what type of server we're configuring
     $inputServer = Read-Host  "What type of server are we configuring? (T140, T340, T440)"
 
-    if ( $inputServer -eq "T140" -or $inputServer -eq "T340" ){
+    if (($inputServer) -eq "T140" -or ($inputServer -eq "T340")){
         Write-Host "You selected $inputServer."
         $errorCatch = $false
         
@@ -27,16 +27,16 @@ while ($errorCatch -eq $true ) {
 
 # Disk formatting selection
 $errorCatch = $true
-while ($errorCatch -eq $true ) {
+while ($errorCatch -eq $true) {
 
     #Read input of user on what type of server we're configuring
     $inputBoot = Read-Host "Does this server have a dedicated boot disk? (y or n)"
     Write-Host "You chose $inputBoot."
 
-    if ( $inputBoot -eq "y" -or $inputBoot -eq "n" ){
+    if (($inputBoot -eq "y") -or ($inputBoot -eq "n" )){
         $errorCatch = $false
         
-        if ( $inputBoot -eq "y" ){
+        if ($inputBoot -eq "y"){
             # Expand OS partition
             $maxSize = (Get-PartitionSupportedSize -driveLetter C).sizeMax
             Resize-Partition -driveLetter C -size $maxSize
@@ -69,29 +69,28 @@ while ($errorCatch -eq $true ) {
 $errorCatch = $true
 
 # Start automation scripts
-while ($errorCatch -eq $true ){
-
+while ($errorCatch -eq $true){
     #Read input of user on what type of server we're configuring
     $inputHyperv = Read-Host "Will this server be a Hyper-V host? (y or n)"
     Write-Host "You chose $inputHyperv"
-    if ( $inputServer -eq "T140" ){
+    if ($inputServer -eq "T140"){
         Write-Host "T140's cannot have Hyper-V role installed."
         $inputHyperv = n
     }
     
-    if ( $inputHyperv -eq "y" -or $inputHyperv -eq "n" ){
+    if (($inputHyperv -eq "y") -or ($inputHyperv -eq "n")){
     
-        if ( $inputHyperv -eq "y" ){
+        if ($inputHyperv -eq "y"){
             & "$psScriptRoot\deploy-hyperv.ps1"
             
-            if ( $inputServer -eq "T340" ){
+            if ($inputServer -eq "T340"){
                    $scriptLocation = "$psScriptRoot\T340\deploy-networking-hyperv.ps1"
                    schtasks.exe /create /f /tn deploy-networking-hyperv /ru SYSTEM /sc ONSTART /tr "powershell.exe -executionPolicy bypass -file $scriptlocation"
                    Write-Host "`$scriptlocation`" is scheduled to run once after reboot."
 
             }
             
-            if ( $inputServer -eq "T440" ){
+            if ($inputServer -eq "T440"){
                    $scriptLocation = "$psScriptRoot\T340\deploy-networking-hyperv.ps1"
                    schtasks.exe /create /f /tn deploy-networking-hyperv /ru SYSTEM /sc ONSTART /tr "powershell.exe -executionPolicy bypass -file $scriptlocation"
                    Write-Host "`$scriptlocation`" is scheduled to run once after reboot."
@@ -100,21 +99,21 @@ while ($errorCatch -eq $true ){
             $errorCatch = $false
         }
         
-        if ( $inputHyperv -eq "n" ){
+        if ($inputHyperv -eq "n"){
             Write-Host "Not deploying Hyper-V."
             Write-Host "Deploying ADDS, DHCP, DNS, and NPAS."
-            Install-WindowsFeature –name AD-Domain-Services,DNS,DHCP,NPAS -includeManagementTools                
+            Install-WindowsFeature -name AD-Domain-Services,DNS,DHCP,NPAS -includeManagementTools                
            
-            if ( $inputServer -eq "T340" ){
+            if ($inputServer -eq "T340"){
                 & "$psScriptRoot\T340\deploy-networking.ps1"
             }
             
-            if ( $inputServer -eq "T440" ){
+            if ($inputServer -eq "T440"){
                 & "$psScriptRoot\T440\deploy-networking.ps1"
                 
             }
             
-            if ( $inputServer -eq "T140" ){
+            if ($inputServer -eq "T140"){
                 & "$psScriptRoot\T140\deploy-networking.ps1"
             }
             
@@ -138,6 +137,6 @@ Rename-Computer -newName $newName
 # Reboot
 $reboot = Read-Host "Do you want to reboot? (y or n)"
 
-if ( $reboot -eq "y" ){
+if ($reboot -eq "y"){
     shutdown -r -t 00 -f
 }
