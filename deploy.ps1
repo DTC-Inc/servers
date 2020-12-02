@@ -2,26 +2,12 @@
 Write-Host "Warning!! This will cause data loss if this is run!"
 pause
 
-# Start automation scripts
-# Expand OS partition
-$maxSize = (Get-PartitionSupportedSize -driveLetter C).sizeMax
-Resize-Partition -driveLetter C -size $maxSize
-
-# Create data1 partition
-$dataDisk = Get-Disk | Where -property partitionStyle -eq RAW | Select -expandProperty number
-Initialze-Disk -partitionStyle GPT -number $dataDisk
-New-Partition -DiskNumber $dataDisk -useMaximumSize -driveLetter D
-Format-Volume -fileSystem NTFS -driveLetter D
-Get-Volume | Where -property driveLetter -eq D | Set-Volume -newFileSystemLabel data1
-
-
 # Server selection
 $errorCatch = $true
 while ($errorCatch -eq $true ) {
 
     # Read input of user on what type of server we're configuring
     $inputServer = Read-Host -prompt "What type of server are we configuring? (T140, T340, T440)"
-    Write-Host "You chose $inpuServert."
 
     if ( $inputServer -eq "T140" -or $inputServer -eq "T340" ){
         Write-Host "You selected $inputServer."
