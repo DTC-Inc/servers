@@ -132,7 +132,7 @@ Write-Host "Deploying OpenSSH"
 & "$psScriptRoot\deploy-openssh.ps1"
 
 # Rename host to HV0 or HV1 etc.. Please check Automate if the name is available in the client
-$newName = Read-Host -prompt "Input the server name (HV0, HV1, etc...)"
+$newName = Read-Host "Input the server name (HV0, HV1, etc...)"
 Rename-Computer -newName $newName
 
 # Reboot
