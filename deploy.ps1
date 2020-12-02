@@ -2,6 +2,8 @@
 Write-Host "Warning!! This will cause data loss if this is run!"
 $killScript = Read-Host "Do you want to kill this script? (y)"
 
+
+
 if ( $killScript -eq "y" ) {
     exit
 }
