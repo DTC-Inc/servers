@@ -1,5 +1,6 @@
 # Init errorCatch variable
-$errorCatch = $true
+Write-Host "Warning!! This will cause data loss if this is run!"
+pause
 
 # Start automation scripts
 # Expand OS partition
