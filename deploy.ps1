@@ -43,7 +43,7 @@ while ($errorCatch -eq $true) {
             
             # Create data1 partition
             $dataDisk = Get-Disk | Where -property partitionStyle -eq RAW | Select -expandProperty number
-            Initialze-Disk -partitionStyle GPT -number $dataDisk
+            Initialize-Disk -partitionStyle GPT -number $dataDisk
             New-Partition -DiskNumber $dataDisk -useMaximumSize -driveLetter D
             Format-Volume -fileSystem NTFS -driveLetter D
             Get-Volume | Where -property driveLetter -eq D | Set-Volume -newFileSystemLabel data1
