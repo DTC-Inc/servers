@@ -86,12 +86,16 @@ while ($errorCatch -eq $true ) {
             & "$psScriptRoot\deploy-hyperv.ps1"
             
             if ( $inputServer -eq "T340" ) {
-                Set-ItemProperty "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -name '!deploy-networking-hyperv' -value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionPolicy bypass -file 'C:\dtc\servers-main\T340\deploy-networking-hyperv.ps1'"
+                   $scriptLocation = "$psScriptRoot\T340\deploy-networking-hyperv.ps1"
+                   schtasks.exe /create /f /tn deploy-networking-hyperv /ru SYSTEM /sc ONSTART /tr "powershell.exe -executionPolicy bypass -file $scriptlocation"
+                   Write-Host "`"$scriptlocation`" is scheduled to run once after reboot."
+
             }
             
             if ( $inputServer -eq "T440" ) {
-                Set-ItemProperty "HKLM:\Software\Microsoft\Windows\CurrentVersion\RunOnce" -name '!deploy-networking-hyperv' -value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -executionPolicy bypass -file 'C:\dtc\servers-main\T440\deploy-networking-hyperv.ps1'"
-                
+                   $scriptLocation = "$psScriptRoot\T340\deploy-networking-hyperv.ps1"
+                   schtasks.exe /create /f /tn deploy-networking-hyperv /ru SYSTEM /sc ONSTART /tr "powershell.exe -executionPolicy bypass -file $scriptlocation"
+                   Write-Host "`"$scriptlocation`" is scheduled to run once after reboot."
             }
             
             $errorCatch = $false
