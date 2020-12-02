@@ -105,15 +105,18 @@ while ($errorCatch -eq $true ) {
             Write-Host "Not deploying Hyper-V."
             
             if ( $inputServer -eq "T340" ) {
+                Install-WindowsFeature –name AD-Domain-Services,DHCP,NPAS -includeManagementTools                
                 & "$psScriptRoot\T340\deploy-networking.ps1"
             }
             
             if ( $inputServer -eq "T440" ) {
+                Install-WindowsFeature –name AD-Domain-Services,DHCP,NPAS -includeManagementTools                                
                 & "$psScriptRoot\T440\deploy-networking.ps1"
                 
             }
             
             if ( $inputServer -eq "T140" ) {
+                Install-WindowsFeature –name AD-Domain-Services,DHCP,NPAS -includeManagementTools                
                 & "$psScriptRoot\T140\deploy-networking.ps1"
             }
             
