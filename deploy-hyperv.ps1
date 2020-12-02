@@ -1,1 +1,1 @@
-Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All
+Install-WindowsFeature -name Hyper-V -includemanagementTools
