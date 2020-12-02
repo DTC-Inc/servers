@@ -1,6 +1,6 @@
 # Init errorCatch variable
 Write-Host "Warning!! This will cause data loss if this is run!"
-$killScript = Read-Host "Do you want to kill this script? (y)"
+$killScript = Read-Host "Do you want to kill this script? (y or n)"
 
 
 
@@ -124,3 +124,10 @@ while ($errorCatch -eq $true ) {
 # Deploy OpenSSH
 Write-Host "Deploying OpenSSH"
 & "$psScriptRoot\deploy-openssh.ps1"
+
+# Reboot
+$reboot = Read-Host "Do you want to reboot? (y or n)"
+
+if ( $reboot -eq "y" ) {
+    shutdown -r -t 00 -f
+}
