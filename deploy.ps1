@@ -147,6 +147,7 @@ if ( $successful -ne "y" ){
 
 if ( $successful -eq "y" ){
     Remove-Item -path "$env:public\Desktop\Provision.lnk" -force -confirm $false
+    Read-Host "Please remember to enable and document Bitlocker. Press enter to continue."
 }
 
 # Reboot
