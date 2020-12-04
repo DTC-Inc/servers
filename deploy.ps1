@@ -134,9 +134,13 @@ Write-Host "Deploying OpenSSH"
 $newName = Read-Host "Input the server name (HV0 HV1 etc...)"
 Rename-Computer -newName $newName
 
+# Remove Provision shortcut
+Remove-Item -path "$env:public\Desktop\Provision.lnk" -force -confirm $false
+
 # Reboot
 $reboot = Read-Host "Do you want to reboot? (y or n)"
 
 if ($reboot -eq "y"){
     shutdown -r -t 00 -f
 }
+
