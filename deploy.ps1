@@ -138,9 +138,16 @@ Rename-Computer -newName $newName
 $productKey = Read-Host "What is the product key? (with dashes)"
 slmgr /ipk $productKey
 
-# Remove Provision shortcut
-Remove-Item -path "$env:public\Desktop\Provision.lnk" -force -confirm $false
+# Success check
+$successful = Read-Host "Did everything complete successfully? (y or n)"
 
+if ( $successful -ne "y" ){
+    Write-Host "Please run this script until all issues are resolved. Once it is successful, it will remove the Provision Desktop shortcut."
+}
+
+if ( $successful -eq "y" ){
+    Remove-Item -path "$env:public\Desktop\Provision.lnk" -force -confirm $false
+}
 
 # Reboot
 $reboot = Read-Host "Do you want to reboot? (y or n)"
