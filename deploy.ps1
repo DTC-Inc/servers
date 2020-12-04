@@ -6,6 +6,8 @@ if ($killScript -eq "y") {
     exit
 }
 
+Set-ExecutionPolicy remoteSigned -force
+
 # Server selection
 $errorCatch = $true
 while ($errorCatch -eq $true) {
