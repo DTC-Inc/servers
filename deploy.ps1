@@ -134,8 +134,13 @@ Write-Host "Deploying OpenSSH"
 $newName = Read-Host "Input the server name (HV0 HV1 etc...)"
 Rename-Computer -newName $newName
 
+# Insert Product Key
+$productKey = Read-Host "What is the product key? (with dashes)"
+slmgr /ipk $productKey
+
 # Remove Provision shortcut
 Remove-Item -path "$env:public\Desktop\Provision.lnk" -force -confirm $false
+
 
 # Reboot
 $reboot = Read-Host "Do you want to reboot? (y or n)"
