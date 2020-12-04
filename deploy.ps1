@@ -102,7 +102,7 @@ while ($errorCatch -eq $true){
         if ($inputHyperv -eq "n"){
             Write-Host "Not deploying Hyper-V."
             Write-Host "Deploying ADDS, DHCP, DNS, and NPAS."
-            Install-WindowsFeature -name AD-Domain-Services,DNS,DHCP,NPAS -includeManagementTools                
+            Install-WindowsFeature -name AD-Domain-Services,DNS,DHCP,NPAS,RSAT-Feature-Tools-Bitlocker,RSAT-Feature-Tools-Bitlocker-RemoteAdminTool,RSAT-Feature-Tools-BitLocker-BdeAducExt,BitLocker -includeManagementTools                
            
             if ($inputServer -eq "T340"){
                 & "$psScriptRoot\T340\deploy-networking.ps1"
