@@ -15,6 +15,9 @@ $isDc = $null
 $isHyperV = $null
 $isRds = $null
 $inputServer = $null
+$deployDc = $null
+$deployHyperV = $null
+$deployRds = $false
 
 Set-ExecutionPolicy remoteSigned -force
 
@@ -160,14 +163,22 @@ if ($inputServer -eq "T440" -and $deployHyperV -eq $false) {
 # Deploy Windows Features
 if ($deployHyperV -eq $true -and $deployDc -eq $true) {
     Install-WindowsFeature -name AD-Domain-Services,DNS,DHCP,NPAS,Hyper-V,RSAT-Feature-Tools-Bitlocker,RSAT-Feature-Tools-Bitlocker-RemoteAdminTool,RSAT-Feature-Tools-BitLocker-BdeAducExt,BitLocker -includeManagementTools
+
 }
 
 if ($deployHyperV -eq $true -and $deployDc -eq $false) {
     Install-WindowsFeature -name Hyper-V,RSAT-Feature-Tools-Bitlocker,RSAT-Feature-Tools-Bitlocker-RemoteAdminTool,RSAT-Feature-Tools-BitLocker-BdeAducExt,BitLocker -includeManagementTools
+    
 }
 
 if ($deployHyperV -eq $false -and $deployDc -eq $true {
     Install-WindowsFeature -name AD-Domain-Services,DNS,DHCP,NPAS,RSAT-Feature-Tools-Bitlocker,RSAT-Feature-Tools-Bitlocker-RemoteAdminTool,RSAT-Feature-Tools-BitLocker-BdeAducExt,BitLocker -includeManagementTools    
+
+}
+
+if ($deployDc = $false -and $deployRds = $false) {
+    New-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\" -Name "InactivityTimeoutSecs" -Value 0x00000384 -PropertyType "DWord"
+    
 }
 
 # Deploy OpenSSH
