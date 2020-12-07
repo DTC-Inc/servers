@@ -1,21 +1,32 @@
-# Init errorCatch variable
-Write-Host "Warning!! This will cause data loss if this is run!"
-$killScript = Read-Host "Do you want to kill this script? (y or n)"
+while ($killScript -ne "y" or $killScript -ne "n") {
+    Write-Host "Warning!! This will cause data loss if this is run!"
+    $killScript = Read-Host "Do you want to kill this script? (y or n)"
+    
+    if ($killScript -ne "y" or $killScript -ne "n") {
+        Write-Host "Wrong answer. Try again."
+    }
+}
 
 if ($killScript -eq "y") {
     exit
 }
 
+$isDc = $null
+$isHyperV = $null
+$isRds = $null
+$inputServer = $null
+
 Set-ExecutionPolicy remoteSigned -force
 
 # Server selection
 $errorCatch = $true
+
 while ($errorCatch -eq $true) {
 
     # Read input of user on what type of server we're configuring
     $inputServer = Read-Host  "What type of server are we configuring? (T140, T340, T440)"
 
-    if (($inputServer) -eq "T140" -or ($inputServer -eq "T340")){
+    if ($inputServer -eq "T140" -or $inputServer -eq "T340"){
         Write-Host "You selected $inputServer."
         $errorCatch = $false
         
@@ -27,13 +38,12 @@ while ($errorCatch -eq $true) {
 
 # Disk formatting selection
 $errorCatch = $true
-while ($errorCatch -eq $true) {
 
-    #Read input of user on what type of server we're configuring
+while ($errorCatch -eq $true) {
     $inputBoot = Read-Host "Does this server have a dedicated boot disk? (y or n)"
     Write-Host "You chose $inputBoot."
 
-    if (($inputBoot -eq "y") -or ($inputBoot -eq "n" )){
+    if ($inputBoot -eq "y" -or $inputBoot -eq "n" ) { 
         $errorCatch = $false
         
         if ($inputBoot -eq "y"){
@@ -50,7 +60,7 @@ while ($errorCatch -eq $true) {
             
         }else {
             # Expand OS partition
-            Resize-Partition -driveLetter C -size 80GB
+            Resize-Partition -driveLetter C -size 120GB
             
             # Create data1 partition
             New-Partition -DiskNumber 0 -useMaximumSize -driveLetter D
@@ -65,78 +75,115 @@ while ($errorCatch -eq $true) {
     }
 }
 
-# Init errorCatch variable
+# Domain Controller
 $errorCatch = $true
 
-# Start automation scripts
-while ($errorCatch -eq $true){
-    #Read input of user on what type of server we're configuring
-    $inputHyperv = Read-Host "Will this server be a Hyper-V host? (y or n)"
-    Write-Host "You chose $inputHyperv"
-    if ($inputServer -eq "T140"){
-        Write-Host "T140's cannot have Hyper-V role installed."
-        $inputHyperv = n
-    }
+while ($errorCatch -eq $true) {
+    $isDc = Read-Host "Is this server going to be a Domain Controller? (y or n)"
     
-    if (($inputHyperv -eq "y") -or ($inputHyperv -eq "n")){
-    
-        if ($inputHyperv -eq "y"){
-            & "$psScriptRoot\deploy-hyperv.ps1"
-            
-            if ($inputServer -eq "T340"){
-                   $scriptLocation = "$psScriptRoot\T340\deploy-networking-hyperv.ps1"
-                   schtasks.exe /create /f /tn deploy-networking-hyperv /ru SYSTEM /sc ONSTART /tr "powershell.exe -executionPolicy bypass -file $scriptlocation"
-                   Write-Host "`$scriptlocation`" is scheduled to run once after reboot."
-
-            }
-            
-            if ($inputServer -eq "T440"){
-                   $scriptLocation = "$psScriptRoot\T340\deploy-networking-hyperv.ps1"
-                   schtasks.exe /create /f /tn deploy-networking-hyperv /ru SYSTEM /sc ONSTART /tr "powershell.exe -executionPolicy bypass -file $scriptlocation"
-                   Write-Host "`$scriptlocation`" is scheduled to run once after reboot."
-            }
-            
-            $errorCatch = $false
+    if ($isDc -eq "y" -or $isDc -eq "n") {        
+        if ($isDc -eq "n") {
+            Write-Host "Not deploying ADDS, DHCP, DNS and NPAS"
+            $deployDc = false
         }
         
-        if ($inputHyperv -eq "n"){
-            Write-Host "Not deploying Hyper-V."
-            Write-Host "Deploying ADDS, DHCP, DNS, and NPAS."
-            Install-WindowsFeature -name AD-Domain-Services,DNS,DHCP,NPAS,RSAT-Feature-Tools-Bitlocker,RSAT-Feature-Tools-Bitlocker-RemoteAdminTool,RSAT-Feature-Tools-BitLocker-BdeAducExt,BitLocker -includeManagementTools                
-           
-            if ($inputServer -eq "T340"){
-                & "$psScriptRoot\T340\deploy-networking.ps1"
-            }
-            
-            if ($inputServer -eq "T440"){
-                & "$psScriptRoot\T440\deploy-networking.ps1"
-                
-            }
-            
-            if ($inputServer -eq "T140"){
-                & "$psScriptRoot\T140\deploy-networking.ps1"
-            }
-            
-            $errorCatch = $false 
+        if ($isDc -eq "y") {
+            Write-Host "Deploying ADDS, DHCP, DNS and NPAS."
+            $deployDc = $true
         }
-          
+        
+        $errorCatch = $false
+        
     }else {
-        Write-Host "Input not accepted. Try again"
-
+        Write-Host "Wrong answer. Try again."
+        
     }
+}
+
+# Hyper-V
+$errorCatch = $true
+while ($errorCatch -eq $true) {
+    $isHyperV = Read-Host "Is this server going to be a Hyper-V Host? (y or n)"
+
+    if ($isHyperV -eq "y" -or $isHyperV -eq "n") {
+        if ($isHyperV -eq "n") {
+            Write-Host "Not deploying Hyper-V"
+            $deployHyperV = $false
+        }
+        
+        if ($inputServer -eq "T140") {
+            Write-Host "T140's cannot be Hyper-V Hosts"
+            $deployHyperV = $false
+        }
+        
+        if ($isHyperV -eq "y") {
+            Write-Host "Deploying Hyper-V"
+            $deployHyperV = $true
+        }
+        
+        $errorCatch = $false
+        
+    }else {
+        Write-Host "Wrong answer. Try again."
+        
+    }
+}     
+
+
+# Deploy Networking
+if ($inputServer -eq "T340" -and $deployHyperV -eq $true) {
+   $scriptLocation = "$psScriptRoot\T340\deploy-networking-hyperv.ps1"
+   schtasks.exe /create /f /tn deploy-networking-hyperv /ru SYSTEM /sc ONSTART /tr "powershell.exe -executionPolicy bypass -file $scriptlocation"
+   Write-Host "`$scriptlocation`" is scheduled to run once after reboot."
+
+}
+
+if ($inputServer -eq "T440" -and $deployHyperV -eq $true) {
+   $scriptLocation = "$psScriptRoot\T440\deploy-networking-hyperv.ps1"
+   schtasks.exe /create /f /tn deploy-networking-hyperv /ru SYSTEM /sc ONSTART /tr "powershell.exe -executionPolicy bypass -file $scriptlocation"
+   Write-Host "`$scriptlocation`" is scheduled to run once after reboot."
+
+}
+
+if ($inputerServer -eq "T140") {
+    & "$psScriptRoot\T140\deploy-networking.ps1"
+}
+
+if ($inputServer -eq "T340" -and $deployHyperV -eq $false) {
+    & "$psScriptRoot\T340\deploy-networking.ps1"
+}
+
+if ($inputServer -eq "T440" -and $deployHyperV -eq $false) {
+    & "$psScriptRoot\T440\deploy-networking.ps1"
+}
+
+# Deploy Windows Features
+if ($deployHyperV -eq $true -and $deployDc -eq $true) {
+    Install-WindowsFeature -name AD-Domain-Services,DNS,DHCP,NPAS,Hyper-V,RSAT-Feature-Tools-Bitlocker,RSAT-Feature-Tools-Bitlocker-RemoteAdminTool,RSAT-Feature-Tools-BitLocker-BdeAducExt,BitLocker -includeManagementTools
+}
+
+if ($deployHyperV -eq $true -and $deployDc -eq $false) {
+    Install-WindowsFeature -name Hyper-V,RSAT-Feature-Tools-Bitlocker,RSAT-Feature-Tools-Bitlocker-RemoteAdminTool,RSAT-Feature-Tools-BitLocker-BdeAducExt,BitLocker -includeManagementTools
+}
+
+if ($deployHyperV -eq $false -and $deployDc -eq $true {
+    Install-WindowsFeature -name AD-Domain-Services,DNS,DHCP,NPAS,RSAT-Feature-Tools-Bitlocker,RSAT-Feature-Tools-Bitlocker-RemoteAdminTool,RSAT-Feature-Tools-BitLocker-BdeAducExt,BitLocker -includeManagementTools    
 }
 
 # Deploy OpenSSH
 Write-Host "Deploying OpenSSH"
 & "$psScriptRoot\deploy-openssh.ps1"
 
+
 # Rename host to HV0 or HV1 etc.. Please check Automate if the name is available in the client
-$newName = Read-Host "Input the server name (HV0 HV1 etc...)"
+$newName = Read-Host "Input the server name (HV0, HV1, SERVER, AD0, etc...)"
 Rename-Computer -newName $newName
+
 
 # Insert Product Key
 $productKey = Read-Host "What is the product key? (with dashes)"
 slmgr /ipk $productKey
+
 
 # Success check
 $successful = Read-Host "Did everything complete successfully? (y or n)"
@@ -149,6 +196,7 @@ if ( $successful -eq "y" ){
     Remove-Item -path "$env:public\Desktop\Provision.lnk" -force -confirm $false
     Read-Host "Please remember to enable and document Bitlocker. Press enter to continue."
 }
+
 
 # Reboot
 $reboot = Read-Host "Do you want to reboot? (y or n)"
