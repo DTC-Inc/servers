@@ -87,7 +87,7 @@ while ($errorCatch -eq $true) {
     if ($isDc -eq "y" -or $isDc -eq "n") {        
         if ($isDc -eq "n") {
             Write-Host "Not deploying ADDS, DHCP, DNS and NPAS"
-            $deployDc = false
+            $deployDc = $false
         }
         
         if ($isDc -eq "y") {
@@ -205,7 +205,8 @@ if ( $successful -ne "y" ){
 
 if ( $successful -eq "y" ){
     Remove-Item -path "$env:public\Desktop\Provision.lnk" -force -confirm $false
-    Read-Host "Please remember to enable and document Bitlocker. Press enter to continue."
+    Read-Host "Please remember to enable and document Bitlocker. (Not required for virtual machines)"
+    pause
 }
 
 
