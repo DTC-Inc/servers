@@ -1,8 +1,8 @@
-while ($killScript -ne "y" or $killScript -ne "n") {
+while ($killScript -ne "y" -or $killScript -ne "n") {
     Write-Host "Warning!! This will cause data loss if this is run!"
     $killScript = Read-Host "Do you want to kill this script? (y or n)"
     
-    if ($killScript -ne "y" or $killScript -ne "n") {
+    if ($killScript -ne "y" -or $killScript -ne "n") {
         Write-Host "Wrong answer. Try again."
     }
 }
