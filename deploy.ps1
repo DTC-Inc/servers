@@ -36,9 +36,8 @@ while ($errorCatch -eq $true) {
     # Read input of user on what type of server we're configuring
     $inputServer = Read-Host  "What type of server are we configuring? (T140, T340, T440)"
 
-    if ($inputServer -eq "T140" -or $inputServer -eq "T340"){
+    if ($inputServer -eq "T140" -or $inputServer -eq "T340" -or $inputServer -eq "T440"){
         Write-Host "You selected $inputServer."
-
         $errorCatch = $false
 
     }else {
@@ -84,7 +83,6 @@ while ($errorCatch -eq $true) {
         Write-Host "Input not accepted. Try again."
 
     }
-    return $errorCatch
 
 }
 
@@ -105,15 +103,13 @@ while ($errorCatch -eq $true) {
             Write-Host "Deploying ADDS, DHCP, DNS and NPAS."
             $deployDc = $true
 
-        }
-        
+        }        
         $errorCatch = $false
         
     }else {
         Write-Host "Wrong answer. Try again."
         
     }
-    return $errorCatch
 
 }
 
@@ -208,9 +204,11 @@ Write-Host "Deploying OpenSSH"
 
 
 # Rename host to HV0 or HV1 etc.. Please check Automate if the name is available in the client
-$newName = Read-Host "Input the server name (HV0, HV1, SERVER, AD0, etc...)"
-Rename-Computer -newName $newName
+$newName = Read-Host "Input the server name (HV0, HV1, SERVER, AD0, etc. Null value doesn't set name.)"
 
+if ($newName) {
+    Rename-Computer -newName $newName
+}
 
 # Insert Product Key
 $productKey = Read-Host "What is the product key? (with dashes)"
