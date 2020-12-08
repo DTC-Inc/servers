@@ -1,8 +1,13 @@
-while ($killScript -ne "y" -or $killScript -ne "n") {
+$errorCatch = $true
+
+while ($errorCatch = $true) {
     Write-Host "Warning!! This will cause data loss if this is run!"
     $killScript = Read-Host "Do you want to kill this script? (y or n)"
     
-    if ($killScript -ne "y" -or $killScript -ne "n") {
+    if ($killScript -eq "y" -or $killScript -eq "n") {
+        $errorCatch = $false
+
+    }else {
         Write-Host "Wrong answer. Try again."
     }
 }
@@ -31,7 +36,9 @@ while ($errorCatch -eq $true) {
 
     if ($inputServer -eq "T140" -or $inputServer -eq "T340"){
         Write-Host "You selected $inputServer."
+
         $errorCatch = $false
+        return $errorCatch
         
     }else {
         Write-Host "Input not accepted. Try again."
@@ -46,9 +53,7 @@ while ($errorCatch -eq $true) {
     $inputBoot = Read-Host "Does this server have a dedicated boot disk? (y or n)"
     Write-Host "You chose $inputBoot."
 
-    if ($inputBoot -eq "y" -or $inputBoot -eq "n" ) { 
-        $errorCatch = $false
-        
+    if ($inputBoot -eq "y" -or $inputBoot -eq "n" ) {         
         if ($inputBoot -eq "y"){
             # Expand OS partition
             $maxSize = (Get-PartitionSupportedSize -driveLetter C).sizeMax
@@ -71,11 +76,14 @@ while ($errorCatch -eq $true) {
             Get-Volume | Where -property driveLetter -eq D | Set-Volume -newFileSystemLabel data1
   
         }
-        
+        $errorCatch = $false
+
     }else {
         Write-Host "Input not accepted. Try again."
 
     }
+    return $errorCatch
+
 }
 
 # Domain Controller
@@ -101,10 +109,13 @@ while ($errorCatch -eq $true) {
         Write-Host "Wrong answer. Try again."
         
     }
+    return $errorCatch
+
 }
 
 # Hyper-V
 $errorCatch = $true
+
 while ($errorCatch -eq $true) {
     $isHyperV = Read-Host "Is this server going to be a Hyper-V Host? (y or n)"
 
@@ -171,12 +182,12 @@ if ($deployHyperV -eq $true -and $deployDc -eq $false) {
     
 }
 
-if ($deployHyperV -eq $false -and $deployDc -eq $true {
+if ($deployHyperV -eq $false -and $deployDc -eq $true) {
     Install-WindowsFeature -name AD-Domain-Services,DNS,DHCP,NPAS,RSAT-Feature-Tools-Bitlocker,RSAT-Feature-Tools-Bitlocker-RemoteAdminTool,RSAT-Feature-Tools-BitLocker-BdeAducExt,BitLocker -includeManagementTools    
 
 }
 
-if ($deployDc = $false -and $deployRds = $false) {
+if ($deployDc -eq $false -and $deployRds -eq $false) {
     New-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\" -Name "InactivityTimeoutSecs" -Value 0x00000384 -PropertyType "DWord"
     
 }
