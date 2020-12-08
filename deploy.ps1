@@ -177,22 +177,25 @@ if ($inputServer -eq "T440" -and $deployHyperV -eq $false) {
 
 }
 
-# Deploy Windows Features
+# Deploy Hyper-V and DC
 if ($deployHyperV -eq $true -and $deployDc -eq $true) {
     Install-WindowsFeature -name AD-Domain-Services,DNS,DHCP,NPAS,Hyper-V,RSAT-Feature-Tools-Bitlocker,RSAT-Feature-Tools-Bitlocker-RemoteAdminTool,RSAT-Feature-Tools-BitLocker-BdeAducExt,BitLocker -includeManagementTools
 
 }
 
+# Deploy Hyper-V Only
 if ($deployHyperV -eq $true -and $deployDc -eq $false) {
     Install-WindowsFeature -name Hyper-V,RSAT-Feature-Tools-Bitlocker,RSAT-Feature-Tools-Bitlocker-RemoteAdminTool,RSAT-Feature-Tools-BitLocker-BdeAducExt,BitLocker -includeManagementTools
     
 }
 
+# Deploy DC Only
 if ($deployHyperV -eq $false -and $deployDc -eq $true) {
     Install-WindowsFeature -name AD-Domain-Services,DNS,DHCP,NPAS,RSAT-Feature-Tools-Bitlocker,RSAT-Feature-Tools-Bitlocker-RemoteAdminTool,RSAT-Feature-Tools-BitLocker-BdeAducExt,BitLocker -includeManagementTools    
 
 }
 
+# Set Machine Inactivity Timeout to 900s if not a domain controller or remote desktop server
 if ($deployDc -eq $false -and $deployRds -eq $false) {
     New-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\" -Name "InactivityTimeoutSecs" -Value 0x00000384 -PropertyType "DWord"
     
