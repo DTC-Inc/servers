@@ -1,19 +1,22 @@
 $errorCatch = $true
 
-while ($errorCatch = $true) {
+while ($errorCatch -eq $true) {
     Write-Host "Warning!! This will cause data loss if this is run!"
     $killScript = Read-Host "Do you want to kill this script? (y or n)"
     
     if ($killScript -eq "y" -or $killScript -eq "n") {
-        $errorCatch = $false
+        $errorCatch =  $false
 
     }else {
         Write-Host "Wrong answer. Try again."
+    
     }
+
 }
 
 if ($killScript -eq "y") {
     exit
+
 }
 
 $isDc = $null
@@ -30,7 +33,6 @@ Set-ExecutionPolicy remoteSigned -force
 $errorCatch = $true
 
 while ($errorCatch -eq $true) {
-
     # Read input of user on what type of server we're configuring
     $inputServer = Read-Host  "What type of server are we configuring? (T140, T340, T440)"
 
@@ -38,12 +40,12 @@ while ($errorCatch -eq $true) {
         Write-Host "You selected $inputServer."
 
         $errorCatch = $false
-        return $errorCatch
-        
+
     }else {
         Write-Host "Input not accepted. Try again."
 
     }
+
 }
 
 # Disk formatting selection
@@ -96,11 +98,13 @@ while ($errorCatch -eq $true) {
         if ($isDc -eq "n") {
             Write-Host "Not deploying ADDS, DHCP, DNS and NPAS"
             $deployDc = $false
+
         }
         
         if ($isDc -eq "y") {
             Write-Host "Deploying ADDS, DHCP, DNS and NPAS."
             $deployDc = $true
+
         }
         
         $errorCatch = $false
@@ -123,16 +127,19 @@ while ($errorCatch -eq $true) {
         if ($isHyperV -eq "n") {
             Write-Host "Not deploying Hyper-V"
             $deployHyperV = $false
+
         }
         
         if ($inputServer -eq "T140") {
             Write-Host "T140's cannot be Hyper-V Hosts"
             $deployHyperV = $false
+
         }
         
         if ($isHyperV -eq "y") {
             Write-Host "Deploying Hyper-V"
             $deployHyperV = $true
+
         }
         
         $errorCatch = $false
@@ -161,14 +168,17 @@ if ($inputServer -eq "T440" -and $deployHyperV -eq $true) {
 
 if ($inputerServer -eq "T140") {
     & "$psScriptRoot\T140\deploy-networking.ps1"
+
 }
 
 if ($inputServer -eq "T340" -and $deployHyperV -eq $false) {
     & "$psScriptRoot\T340\deploy-networking.ps1"
+
 }
 
 if ($inputServer -eq "T440" -and $deployHyperV -eq $false) {
     & "$psScriptRoot\T440\deploy-networking.ps1"
+
 }
 
 # Deploy Windows Features
@@ -212,12 +222,14 @@ $successful = Read-Host "Did everything complete successfully? (y or n)"
 
 if ( $successful -ne "y" ){
     Write-Host "Please run this script until all issues are resolved. Once it is successful, it will remove the Provision Desktop shortcut."
+
 }
 
 if ( $successful -eq "y" ){
     Remove-Item -path "$env:public\Desktop\Provision.lnk" -force -confirm $false
     Read-Host "Please remember to enable and document Bitlocker. (Not required for virtual machines)"
     pause
+
 }
 
 
@@ -226,5 +238,6 @@ $reboot = Read-Host "Do you want to reboot? (y or n)"
 
 if ($reboot -eq "y"){
     shutdown -r -t 00 -f
+
 }
 
