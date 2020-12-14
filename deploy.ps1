@@ -224,7 +224,7 @@ if ($deployDc -eq $false -and $deployRds -eq $false) {
 }
 
 if ($inputVendor -eq "dell") {
-    & "$psScriptRoot\deploy-openmanage.ps1"
+    & "$psScriptRoot\deploy-open-manage.ps1"
 }
 
 
