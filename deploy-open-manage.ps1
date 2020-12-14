@@ -8,4 +8,4 @@ Expand-Archive -path "$env:windir\temp\systems-management-x64.zip" -destinationP
 
 # Install
 msiexec.exe /i "$env:systemdrive\dtc\packages\ism\windows\iDRACSvcMod.msi" /quiet /norestart
-msiexec.exe /i "$env:systemdrive\dtc\packages\systems-management-x64\windows\iDRACSvcMod.msi" /quiet /norestart
+msiexec.exe /i "$env:systemdrive\dtc\packages\systems-management-x64\SystemsManagementx64\SysMgmtx64.msi" /quiet /norestart
