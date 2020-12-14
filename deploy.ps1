@@ -26,8 +26,30 @@ $inputServer = $null
 $deployDc = $null
 $deployHyperV = $null
 $deployRds = $false
+$inputVendor = $null
 
 Set-ExecutionPolicy remoteSigned -force
+
+# Vendor selection
+# Server selection
+$errorCatch = $true
+
+while ($errorCatch -eq $true) {
+    # Read input of user on what type of server we're configuring
+    $inputVendor = Read-Host  "Who made this server? (dell, hpe, lenovo)"
+
+    if ($inputVendor -eq "lenovo" -or $inputVendor -eq "dell" -or $inputVendor -eq "hpe"){
+        Write-Host "You selected $inputVendor."
+        $errorCatch = $false
+
+    }else {
+        Write-Host "Input not accepted. Try again."
+
+    }
+
+}
+
+
 
 # Server selection
 $errorCatch = $true
@@ -200,6 +222,11 @@ if ($deployDc -eq $false -and $deployRds -eq $false) {
     New-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Policies\System\" -Name "InactivityTimeoutSecs" -Value 0x00000384 -PropertyType "DWord"
     
 }
+
+if ($inputVendor -eq "dell") {
+    & "$psScriptRoot\deploy-openmanage.ps1"
+}
+
 
 # Deploy OpenSSH
 Write-Host "Deploying OpenSSH"
