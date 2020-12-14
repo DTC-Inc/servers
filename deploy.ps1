@@ -227,8 +227,8 @@ if ( $successful -ne "y" ){
 }
 
 if ( $successful -eq "y" ){
-    Remove-Item -path "$env:public\Desktop\Provision.lnk" -force -confirm $false
-    Read-Host "Please remember to enable and document Bitlocker. (Not required for virtual machines)"
+    Remove-Item -path "$env:public\Desktop\Provision.lnk" -force
+    Write-Host "Please remember to enable and document Bitlocker. (Not required for virtual machines)"
     pause
 
 }
