@@ -31,7 +31,6 @@ $inputVendor = $null
 Set-ExecutionPolicy remoteSigned -force
 
 # Vendor selection
-# Server selection
 $errorCatch = $true
 
 while ($errorCatch -eq $true) {
