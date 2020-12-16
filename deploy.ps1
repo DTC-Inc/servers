@@ -241,8 +241,9 @@ if ($newName) {
 
 # Insert Product Key
 $productKey = Read-Host "What is the product key? (with dashes)"
-slmgr /ipk $productKey
-
+if ($productKey) {
+    slmgr /ipk $productKey
+}
 
 # Success check
 $successful = Read-Host "Did everything complete successfully? (y or n)"
