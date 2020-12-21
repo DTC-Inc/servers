@@ -222,12 +222,15 @@ if ($deployDc -eq $false -and $deployRds -eq $false) {
     
 }
 
+# Deploy Visual C++
+& "$psScriptRoot\deploy-visual-c.ps1"
+
+# Deploy OpenManage
 if ($inputVendor -eq "dell") {
     & "$psScriptRoot\deploy-open-manage.ps1"
 }
 
-# Deploy Visual C++
-& "$psScriptRoot\deploy-visual-c.ps1"
+
 
 # Deploy OpenSSH
 Write-Host "Deploying OpenSSH"
