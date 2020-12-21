@@ -9,6 +9,6 @@ Expand-Archive -path "$env:windir\temp\systems-management-x64.zip" -destinationP
 Expand-Archive -path "$env:windir\temp\pre-req-checker.zip" -destinationPath "$env:systemdrive\dtc\packages\pre-req-checker" -force
 
 # Install
-Start-Process -FilePath "$env:systemdrive\dtc\packages\pre-req-checker\PreReqChecker\RunPreReqChecks.exe" -Args "/s"
-Start-Process -FilePath "msiexec.exe" -Args "/i $env:systemdrive\dtc\packages\ism\windows\iDRACSvcMod.msi /quiet /norestart"
-Start-Process -FilePath "msiexec.exe" -Args "/i $env:systemdrive\dtc\packages\systems-management-x64\SystemsManagementx64\SysMgmtx64.msi /quiet /norestart"
+Start-Process -filePath "$env:systemdrive\dtc\packages\pre-req-checker\PreReqChecker\RunPreReqChecks.exe" -args "/s" -wait
+Start-Process -filePath "msiexec.exe" -args "/i $env:systemdrive\dtc\packages\ism\windows\iDRACSvcMod.msi /quiet /norestart" -wait
+Start-Process -filePath "msiexec.exe" -args "/i $env:systemdrive\dtc\packages\systems-management-x64\SystemsManagementx64\SysMgmtx64.msi /quiet /norestart" -wait
