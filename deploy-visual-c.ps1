@@ -6,4 +6,4 @@ wget https://s3.us-west-002.backblazeb2.com/public-dtc/repo/vendors/msft/visutal
 Expand-Archive -path "$env:windir\temp\visual-c-runtimes-all-in-one-aug-2020.zip" -destinationPath "$env:systemdrive\dtc\packages\visual-c-runtimes-all-in-one-aug-2020" -force
 
 # Install
-Start-Process -FilePath "cmd.exe" -Args "/c $env:systemdrive\dtc\packages\visual-c-runtimes-all-in-one-aug-2020\install.bat"
+Start-Process -FilePath "cmd.exe" -Args "/c $env:systemdrive\dtc\packages\visual-c-runtimes-all-in-one-aug-2020\install_all.bat"
