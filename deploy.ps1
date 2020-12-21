@@ -236,6 +236,8 @@ if ($inputVendor -eq "dell") {
 Write-Host "Deploying OpenSSH"
 & "$psScriptRoot\deploy-openssh.ps1"
 
+# Deploy apps
+Start-Process -filePath "$env:systemdrive\dtc\servers-main\dep\ninte.exe" -wait
 
 # Rename host to HV0 or HV1 etc.. Please check Automate if the name is available in the client
 $newName = Read-Host "Input the server name (HV0, HV1, SERVER, AD0, etc. Null value doesn't set name.)"
