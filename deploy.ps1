@@ -227,6 +227,7 @@ if ($deployDc -eq $false -and $deployRds -eq $false) {
 
 # Deploy OpenManage
 if ($inputVendor -eq "dell") {
+    Write-Host "Deploying Dell OpenManage."
     & "$psScriptRoot\deploy-open-manage.ps1"
 }
 
@@ -237,6 +238,7 @@ Write-Host "Deploying OpenSSH"
 & "$psScriptRoot\deploy-openssh.ps1"
 
 # Deploy apps
+Write-Host "Deploying essential apps."
 Start-Process -filePath "$env:systemdrive\dtc\servers-main\dep\ninite.exe" -wait
 
 # Rename host to HV0 or HV1 etc.. Please check Automate if the name is available in the client
