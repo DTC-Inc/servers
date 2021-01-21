@@ -242,7 +242,7 @@ if ($inputVendor -eq "dell") {
 # Deploy OpenSSH
 Write-Host "Deploying OpenSSH"
 $scriptLocation = "$psScriptRoot\deploy-openssh.ps1"
-schtasks.exe /create /f /tn deploy-openssh /ru SYSTEM /sc ONGLOGON /tr "powershell.exe -executionPolicy bypass -file $scriptLocation"
+schtasks.exe /create /f /tn deploy-openssh /ru SYSTEM /sc ONLOGON /tr "powershell.exe -executionPolicy bypass -file $scriptLocation"
 Write-Host "`$scriptLocation`" is scheduled to run once after reboot."
 
 # Deploy apps
