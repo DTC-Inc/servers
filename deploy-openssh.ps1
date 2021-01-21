@@ -17,3 +17,7 @@ Get-NetFirewallRule -Name *ssh*
 
 # Apply Default Shell
 New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -PropertyType String -Force
+
+# Delete scheduled task
+Write-EventLog -messasge "deploy-openssh: hi I ran on reboot" -LogName System -Source EventLog -EventId 333
+schtasks.exe /delete /f /tn deploy-openssh
