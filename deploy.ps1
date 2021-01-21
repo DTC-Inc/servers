@@ -19,6 +19,12 @@ if ($killScript -eq "y") {
 
 }
 
+# Setup IE
+Write-Host "IE is going to open. Please go initial setup selecting all defaults."
+pause
+
+Start-Process -filePath "$env:programfiles\Internet Explorer\iexplore.exe" -wait
+
 $isDc = $null
 $isHyperV = $null
 $isRds = $null
