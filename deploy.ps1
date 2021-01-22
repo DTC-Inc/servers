@@ -43,7 +43,7 @@ while ($errorCatch -eq $true) {
     # Read input of user on what type of server we're configuring
     $inputVendor = Read-Host  "Who made this server? (dell, hpe, lenovo, vm)"
 
-    if ($inputVendor -eq "lenovo" -or $inputVendor -eq "dell" -or $inputVendor -eq "hpe" -or $inputVendoer -eq "vm"){
+    if ($inputVendor -eq "lenovo" -or $inputVendor -eq "dell" -or $inputVendor -eq "hpe" -or $inputVendor -eq "vm"){
         Write-Host "You selected $inputVendor."
         $errorCatch = $false
 
