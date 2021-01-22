@@ -61,9 +61,9 @@ $errorCatch = $true
 
 while ($errorCatch -eq $true) {
     # Read input of user on what type of server we're configuring
-    $inputServer = Read-Host  "What type of server are we configuring? (T140, T340, T440)"
+    $inputServer = Read-Host  "What type of server are we configuring? (T140, T340, T440, vm)"
 
-    if ($inputServer -eq "T140" -or $inputServer -eq "T340" -or $inputServer -eq "T440"){
+    if ($inputServer -eq "T140" -or $inputServer -eq "T340" -or $inputServer -eq "T440" -or $inputServer -eq "vm"){
         Write-Host "You selected $inputServer."
         $errorCatch = $false
 
@@ -76,6 +76,10 @@ while ($errorCatch -eq $true) {
 
 # Disk formatting selection
 $errorCatch = $true
+
+if ($inputServer -eq "vm"){
+    $errorCatch = $false
+}
 
 while ($errorCatch -eq $true) {
     $inputBoot = Read-Host "Does this server have a dedicated boot disk? (y or n)"
