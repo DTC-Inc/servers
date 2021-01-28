@@ -254,9 +254,18 @@ Write-Host "Deploying essential apps."
 Start-Process -filePath "$env:systemdrive\dtc\servers-main\dep\ninite.exe" -wait
 
 # Rename host to HV0 or HV1 etc.. Please check Automate if the name is available in the client
-$newName = Read-Host "Input the server name (HV0, HV1, SERVER, AD0, etc. Null value doesn't set name.)"
+$newName = Read-Host "Input the server name (HV0, HV1, SERVER, AD0, etc. Null value doesn't set name. Set a name if joining a domain.)"
 
-if ($newName) {
+# Domain Join
+$domainJoin = Read-Host "Please enter a domain name to join. Null value doesn't join a domain."
+
+
+if ($newName -and $domainJoin) {
+    $credential = Get-Credential
+    Add-Computer -domainName $domainJoin -newName $newName -credential $credential
+}
+
+if ($newName -and !$domainJoin) {
     Rename-Computer -newName $newName
 }
 
