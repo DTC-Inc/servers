@@ -7,6 +7,7 @@ if (-Not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
     }
 }
 
+Set-ExecutionPolicy Bypass
 
 # Update to latest master
 Remove-Item -path $env:windir\temp\servers.zip -force -confirm:$false
