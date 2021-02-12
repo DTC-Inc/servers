@@ -34,8 +34,6 @@ $deployHyperV = $null
 $deployRds = $false
 $inputVendor = $null
 
-Set-ExecutionPolicy remoteSigned -force
-
 # Vendor selection
 $errorCatch = $true
 
@@ -290,6 +288,7 @@ if ( $successful -eq "y" ){
 
 }
 
+Set-ExecutionPolicy RemoteSigned -force
 
 # Reboot
 $reboot = Read-Host "Do you want to reboot? (y or n)"
