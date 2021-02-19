@@ -1,4 +1,4 @@
-Set-ExecutionPolicy Bypass
+Set-ExecutionPolicy Bypass -Force
 
 $errorCatch = $true
 
@@ -290,7 +290,7 @@ if ( $successful -eq "y" ){
 
 }
 
-Set-ExecutionPolicy RemoteSigned -force
+Set-ExecutionPolicy RemoteSigned -Force
 
 # Reboot
 $reboot = Read-Host "Do you want to reboot? (y or n)"
