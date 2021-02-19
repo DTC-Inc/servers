@@ -1,3 +1,5 @@
+Set-ExecutionPolicy Unrestricted
+
 $errorCatch = $true
 
 while ($errorCatch -eq $true) {
