@@ -1,4 +1,4 @@
-Set-ExecutionPolicy Unrestricted
+Set-ExecutionPolicy Bypass
 
 $errorCatch = $true
 
