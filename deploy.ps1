@@ -92,7 +92,7 @@ while ($errorCatch -eq $true) {
             Resize-Partition -driveLetter C -size $maxSize
             
             # Create data1 partition
-            $dataDisk = Get-Disk | Where -property partitionStyle -eq RAW | Select -expandProperty number
+            $dataDisk = Get-Disk | Where -property isBoot -ne $true | Select -expandProperty number
             Initialize-Disk -partitionStyle GPT -number $dataDisk
             New-Partition -DiskNumber $dataDisk -useMaximumSize -driveLetter D
             Format-Volume -fileSystem NTFS -driveLetter D
