@@ -1,3 +1,6 @@
+Write-Host "If Net adapters are vendor mixed, member count is always split between vendor."
+$memberCount = Read-Host "Enter NICs Per Team (2 most common and default)"
+
 if (!$memberCount) {
 	$memberCount = 2
 
