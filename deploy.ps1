@@ -181,14 +181,14 @@ while ($errorCatch -eq $true) {
 # Deploy Networking
 if ($inputServer -eq "T340" -and $deployHyperV -eq $true) {
    $scriptLocation = "$psScriptRoot\T340\deploy-networking-hyperv.ps1"
-   schtasks.exe /create /f /tn deploy-networking-hyperv /ru SYSTEM /sc ONLOGON /tr "powershell.exe -executionPolicy bypass -file $scriptLocation"
+   schtasks.exe /create /f /tn deploy-networking-hyperv /ru Administrator /sc ONLOGON /rl HIGHEST /tr "powershell.exe -executionPolicy bypass -file $scriptLocation"
    Write-Host "$scriptLocation is scheduled to run once after reboot."
 
 }
 
 if ($inputServer -eq "T440" -and $deployHyperV -eq $true) {
    $scriptLocation = "$psScriptRoot\T440\deploy-networking-hyperv.ps1"
-   schtasks.exe /create /f /tn deploy-networking-hyperv /ru SYSTEM /sc ONLOGON /tr "powershell.exe -executionPolicy bypass -file $scriptLocation"
+   schtasks.exe /create /f /tn deploy-networking-hyperv /ru Administrator /sc ONLOGON /rl HIGHEST /tr "powershell.exe -executionPolicy bypass -file $scriptLocation"
    Write-Host "$scriptLocation is scheduled to run once after reboot."
 
 }
