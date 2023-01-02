@@ -1,47 +1,31 @@
-Write-Host "Net adapters will be teamed fully between amount of NICs per embedded & Slot 1, Slot 2, Slot 3, & Slot 4."
-Write-Host "***WARNING*** This script supports a maxmium of 1 embedded NI (all interfaces) & 4 NIC card slots."
+$ready = "n"
+while ($ready -ne "r") {
+	$ready = Read-Host "Please patch in NICs to team. Type 'r' when ready:"
+	if ($ready -eq "r") {
+			Write-Host "YEEET!"
+	} else {
+			Write-Host "Guess you're not ready. Hurry and patch in that first team!"
+	}
+}
 
+$finished = "n"
+
+# Remove all existing teaming.
 Get-NetLbfoTeam | Remove-NetLbfoTeam -confirm:$false
 Get-VMNetworkAdapter -managementOS | Where-Object -Property "name" -NotLike "Container NIC*" | Remove-VMNetworkAdapter
 Get-VMSwitch | Where-Object -Property name -NotLike "Default Switch" | Remove-VMSwitch -Force
+Start-Sleep -Seconds 10
 
-$nicList = Get-NetAdapter | Where-Object { ($_.Name -like "Embedded*") -or ($_.Name -like "Slot 1**") } | Select-Object -ExpandProperty Name
-$nicCount = $nicList | Measure-Object | Select-Object -ExpandProperty Count
-
-if ($nicList -like "Embedded*" -and $nicList -like "Slot 1*") {
-  $firstNicList = Get-NetAdapter | Where-Object -Property Name -Like "Embedded*" | Select-Object -ExpandProperty Name
-  $secondNicList = Get-NetAdapter | Where-Object -Property Name -Like "Slot 1*" | Select-Object -ExpandProperty Name
-
-
-} else {
-  $firstNicList = Get-NetAdapter | Where-Object { $_.Name -like "Embedded*" } | Select-Object -Last $memberCount | Select-Object -ExpandProperty Name
-  $secondNicList = Get-NetAdapter | Where-Object { $_.Name -like "Embedded*" } | Select-Object -First $memberCount | Select-Object -ExpandProperty Name
-
-
+# Create NIC team(s) based off of link-state. Cables must be patched in for each loop.
+$count = 0
+while ( $finished -eq "n" ) {
+	$count = $count + 1
+	$nicList = Get-NetAdapter | Where -Property DriverFileName -notlike "usb*"| Where -Property Status -eq 'Up' | Select -ExpandProperty Name
+	if ($count -eq 1) { 
+		New-VMSwitch -Name SET$count -netAdapterName $nicList -enableEmbeddedTeaming $true -ManagementOs
+	} else {
+		New-VMSwitch -Name SET$count -netAdapterName $nicList -enableEmbeddedTeaming $true
+	}
+	$finished = Read-Host "Are you finished? y/n:"
+	
 }
-
-if ($nicCount -eq $memberCount) {
-  $secondNicList = $null
-
-}
-
-# Create SET team SET1 and Management vNIC. Also sets load balancing algorithm to dynamic
-New-VMSwitch -Name SET1 -netAdapterName $firstNicList -enableEmbeddedTeaming $true
-Rename-VMNetworkAdapter -Name SET1 -NewName vNIC1 -managementOS
-Set-VMSwitchTeam -Name SET1 -loadBalancingAlgorithm dynamic
-ping 8.8.8.8 -n 30
-
-# Create SET team SET2 w/ no vNIC for Management OS. Also sets load balancing algorithm to dynamic
-if ($secondNicList) {
-  New-VMSwitch -Name SET2 -netAdapterName $secondNicList -enableEmbeddedTeaming $true -allowManagementOs $false
-  Set-VMSwitchTeam -Name SET2 -loadBalancingAlgorithm dynamic
-
-}
-
-# Change default Hyper-V Storage location
-Set-VMHost -virtualHardDiskPath "D:\Virtual Hard Disks"
-Set-VMHost -virtualMachinePath "D:\"
-
-# Delete scheduled task
-Write-EventLog -messasge "deploy-networking-hyperv: hi I ran on reboot" -LogName System -Source EventLog -EventId 333
-schtasks.exe /delete /f /tn deploy-networking-hyperv
