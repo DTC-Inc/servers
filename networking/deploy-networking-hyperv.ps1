@@ -24,9 +24,10 @@ while ( $finished -eq "n" ) {
 	$count = $count + 1
 	$nicList = Get-NetAdapter | Where -Property DriverFileName -notlike "usb*"| Where -Property Status -eq 'Up' | Select -ExpandProperty Name
 	if ($count -eq 1) { 
-		New-VMSwitch -Name SET$count -netAdapterName $nicList -enableEmbeddedTeaming $true -ManagementOs
-	} else {
 		New-VMSwitch -Name SET$count -netAdapterName $nicList -enableEmbeddedTeaming $true
+		Rename-VmNetworkAdapter -Name SET$count -NewName vNIC1 -ManagementOs
+	} else {
+		New-VMSwitch -Name SET$count -netAdapterName $nicList -enableEmbeddedTeaming $true -AllowManagementOs $False
 	}
 	$finished = Read-Host "Are you finished? y/n:"
 	
