@@ -1,3 +1,5 @@
+# Wait for the ready!
+
 $ready = "n"
 while ($ready -ne "r") {
 	$ready = Read-Host "Please patch in NICs to team. Type 'r' when ready:"
