@@ -47,3 +47,4 @@ while ( $finished -eq "n" ) {
 		}	
 	}
 	$finished = Read-Host "Are you finished? y/n"
+}
