@@ -118,8 +118,8 @@ if ($RMM -ne 1) {
     }
 
     # Optional configurations
-    $input = Read-Host "Enter company name (default: DTC)"
-    if (![string]::IsNullOrEmpty($input)) { $CompanyName = $input }
+    $userInput = Read-Host "Enter company name (default: DTC)"
+    if (![string]::IsNullOrEmpty($userInput)) { $CompanyName = $userInput }
 
     $response = Read-Host "Skip Windows Updates? (y/n, default: n)"
     if ($response -eq 'y') { $SkipWindowsUpdate = $true }
@@ -131,20 +131,20 @@ if ($RMM -ne 1) {
     if ($response -eq 'y') { $SkipNetworkTeaming = $true }
 
     if (!$SkipNetworkTeaming) {
-        $input = Read-Host "NICs per team - 2 or 4? (default: 2)"
-        if ($input -eq "4") { $TeamsOf = 4 }
+        $userInput = Read-Host "NICs per team - 2 or 4? (default: 2)"
+        if ($userInput -eq "4") { $TeamsOf = 4 }
 
         $response = Read-Host "Auto-configure teams by PCIe card? (y/n, default: n)"
         if ($response -eq 'y') { $AutoNICTeaming = $true }
     }
 
-    $input = Read-Host "Storage redundancy type (ers/rrs/zrs/grs, default: ers)"
-    if ($input -in @("ers", "rrs", "zrs", "grs")) {
-        $StorageRedundancy = $input
+    $userInput = Read-Host "Storage redundancy type (ers/rrs/zrs/grs, default: ers)"
+    if ($userInput -in @("ers", "rrs", "zrs", "grs")) {
+        $StorageRedundancy = $userInput
     }
 
-    $input = Read-Host "Enter time zone (default: Eastern Standard Time, type 'list' to see all)"
-    if ($input -eq 'list') {
+    $userInput = Read-Host "Enter time zone (default: Eastern Standard Time, type 'list' to see all)"
+    if ($userInput -eq 'list') {
         Write-Host "Common US Time Zones:" -ForegroundColor Yellow
         Write-Host "  Eastern Standard Time" -ForegroundColor Gray
         Write-Host "  Central Standard Time" -ForegroundColor Gray
@@ -154,10 +154,10 @@ if ($RMM -ne 1) {
         Write-Host "  Hawaiian Standard Time" -ForegroundColor Gray
         Write-Host ""
         Write-Host "Use 'Get-TimeZone -ListAvailable' in PowerShell to see all available time zones" -ForegroundColor Gray
-        $input = Read-Host "Enter time zone"
+        $userInput = Read-Host "Enter time zone"
     }
-    if (![string]::IsNullOrEmpty($input)) {
-        $TimeZone = $input
+    if (![string]::IsNullOrEmpty($userInput)) {
+        $TimeZone = $userInput
     }
 
     $Description = Read-Host "Enter a description for this setup (optional)"
@@ -384,6 +384,9 @@ try {
                 if ($continue -ne 'y') {
                     throw "Setup cancelled due to computer rename failure"
                 }
+            } else {
+                Write-LogProgress "WARNING: Computer rename failed in RMM mode - server running with incorrect name '$env:COMPUTERNAME'" "Warning"
+                Write-Host "WARNING: Computer rename failed - server will run with name '$env:COMPUTERNAME' instead of '$NewComputerName'" -ForegroundColor Red
             }
         }
     } else {
@@ -556,6 +559,8 @@ try {
                     WaitAfterInstall = 60
                 }
             )
+
+            $anyDellToolInstalled = $false
 
             foreach ($download in $downloads) {
                 if ($download.Skip) {
@@ -875,6 +880,7 @@ try {
 
                         if ($installSuccess) {
                             Write-Host "  $($download.Name) installed and verified successfully" -ForegroundColor Green
+                            $anyDellToolInstalled = $true
                         } else {
                             Write-Host "  $($download.Name) installation FAILED verification" -ForegroundColor Red
                             Write-LogProgress "  Installation did not complete successfully - manual intervention may be required" "Error"
@@ -890,12 +896,14 @@ try {
                 }
             }
 
-            # Dell tools may require reboot
-            Add-RebootReason "Dell OpenManage and Tools Installation"
-            Write-Host "Dell tools installed (MAY REQUIRE REBOOT)" -ForegroundColor Yellow
+            # Dell tools may require reboot (only add if something was actually installed)
+            if ($anyDellToolInstalled) {
+                Add-RebootReason "Dell OpenManage and Tools Installation"
+                Write-Host "Dell tools installed (MAY REQUIRE REBOOT)" -ForegroundColor Yellow
+            }
 
             # Run Dell System Update to apply firmware/driver updates
-            $dsuPath = "C:\Program Files\Dell\SysMgt\DSU\dsu.exe"
+            $dsuPath = "C:\Program Files\Dell\DELL System Update\DSU.exe"
             if (Test-Path $dsuPath) {
                 Write-Host ""
                 Write-Host "========================================" -ForegroundColor Cyan
@@ -954,7 +962,7 @@ try {
             Write-Host "Dell OpenManage already installed" -ForegroundColor Green
 
             # If OpenManage is already installed, still offer to run DSU
-            $dsuPath = "C:\Program Files\Dell\SysMgt\DSU\dsu.exe"
+            $dsuPath = "C:\Program Files\Dell\DELL System Update\DSU.exe"
             if (Test-Path $dsuPath) {
                 Write-Host ""
                 Write-Host "Running Dell System Update to check for firmware/driver updates..." -ForegroundColor Cyan
@@ -1008,9 +1016,14 @@ try {
                 try {
                     # Set password for iDRAC user 2 (root account)
                     Write-Host "  Setting iDRAC root password..." -ForegroundColor Gray
+
+                    # Temporarily suspend transcript to avoid logging password
+                    try { Stop-Transcript } catch { }
                     $setPasswordProcess = Start-Process -FilePath $racadmPath `
                                                        -ArgumentList "set iDRAC.Users.2.Password `"$iDRACPassword`"" `
                                                        -PassThru -NoNewWindow -Wait
+                    # Resume transcript
+                    try { Start-Transcript -Path $LogFile -Append } catch { }
 
                     if ($setPasswordProcess.ExitCode -eq 0) {
                         Write-Host "  iDRAC root password set successfully" -ForegroundColor Green
@@ -1372,7 +1385,8 @@ try {
 
                     try {
                         # Get next available drive letter (start from D:)
-                        $usedLetters = Get-Partition | Where-Object { $_.DriveLetter } | Select-Object -ExpandProperty DriveLetter
+                        # Use Get-Volume to catch all drive letters including network drives and CD-ROMs
+                        $usedLetters = Get-Volume | Where-Object { $_.DriveLetter } | Select-Object -ExpandProperty DriveLetter
                         $availableLetters = @('D', 'E', 'F', 'G', 'H') | Where-Object { $_ -notin $usedLetters }
                         $driveLetter = $availableLetters[0]
 
@@ -1407,8 +1421,10 @@ try {
     if ($dataDisks.Count -gt 0) {
         Write-Host "Configuring $($dataDisks.Count) data disk(s)..."
 
+        # Use Get-Volume to catch all drive letters including network drives and CD-ROMs
+        $usedLetters = Get-Volume | Where-Object { $_.DriveLetter } | Select-Object -ExpandProperty DriveLetter
+        $availableDriveLetters = @('D', 'E', 'F', 'G', 'H') | Where-Object { $_ -notin $usedLetters }
         $driveLetterIndex = 0
-        $driveLetters = @('D', 'E', 'F', 'G', 'H')
 
         foreach ($disk in $dataDisks) {
             $diskNumber = $disk.Number
@@ -1419,7 +1435,7 @@ try {
                 Write-Host "Initializing Disk $diskNumber as GPT..."
                 Initialize-Disk -Number $diskNumber -PartitionStyle GPT -PassThru | Out-Null
 
-                $driveLetter = $driveLetters[$driveLetterIndex]
+                $driveLetter = $availableDriveLetters[$driveLetterIndex]
                 $partition = New-Partition -DiskNumber $diskNumber -UseMaximumSize -DriveLetter $driveLetter
                 Format-Volume -DriveLetter $partition.DriveLetter `
                              -FileSystem NTFS `
@@ -1479,8 +1495,18 @@ try {
     if (!$SkipNetworkTeaming) {
         Start-ProgressStep "Network Teaming Configuration"
 
-        # Clean up any existing virtual switches
-        Get-VMSwitch -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "SET*" } | Remove-VMSwitch -Force -ErrorAction SilentlyContinue
+        # Clean up any existing virtual switches (only if no VMs are connected)
+        $existingSwitches = Get-VMSwitch -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "SET*" }
+        foreach ($switch in $existingSwitches) {
+            $connectedVMs = Get-VMNetworkAdapter -All -ErrorAction SilentlyContinue | Where-Object { $_.SwitchName -eq $switch.Name }
+            if ($connectedVMs) {
+                Write-LogProgress "WARNING: Virtual switch '$($switch.Name)' has connected VMs - skipping removal" "Warning"
+                Write-Host "  Skipping removal of '$($switch.Name)' - $($connectedVMs.Count) VM(s) connected" -ForegroundColor Yellow
+            } else {
+                Remove-VMSwitch -Name $switch.Name -Force -ErrorAction SilentlyContinue
+                Write-LogProgress "Removed existing virtual switch: $($switch.Name)" "Info"
+            }
+        }
 
         # Get ALL physical network adapters for teaming (regardless of link state)
         $adapters = Get-NetAdapter | Where-Object {
@@ -1687,21 +1713,23 @@ try {
                 Write-Host "BitLocker configuration skipped - module files not available" -ForegroundColor Yellow
                 Write-Host "This usually means a REBOOT IS REQUIRED after BitLocker installation" -ForegroundColor Yellow
                 Write-Host "Reboot the server and re-run this script to enable BitLocker" -ForegroundColor Yellow
-                # Skip to end of BitLocker section
-                continue
+                # Module path not found, skip import attempt
             }
 
-            try {
-                Import-Module BitLocker -ErrorAction Stop
-                Write-LogProgress "BitLocker module loaded successfully" "Success"
-            } catch {
-                Write-LogProgress "Failed to import BitLocker module: $($_.Exception.Message)" "Error"
-                Write-LogProgress "Module files may not be available until after reboot" "Warning"
-                Write-Host "BitLocker configuration skipped - module import failed" -ForegroundColor Yellow
-                Write-Host "ERROR: $($_.Exception.Message)" -ForegroundColor Red
-                Write-Host ""  -ForegroundColor Yellow
-                Write-Host "SOLUTION: Reboot the server to complete BitLocker installation" -ForegroundColor Cyan
-                Write-Host "Then re-run this script to configure BitLocker encryption" -ForegroundColor Cyan
+            # Only attempt to import module if path exists
+            if (Test-Path $modulePath) {
+                try {
+                    Import-Module BitLocker -ErrorAction Stop
+                    Write-LogProgress "BitLocker module loaded successfully" "Success"
+                } catch {
+                    Write-LogProgress "Failed to import BitLocker module: $($_.Exception.Message)" "Error"
+                    Write-LogProgress "Module files may not be available until after reboot" "Warning"
+                    Write-Host "BitLocker configuration skipped - module import failed" -ForegroundColor Yellow
+                    Write-Host "ERROR: $($_.Exception.Message)" -ForegroundColor Red
+                    Write-Host ""  -ForegroundColor Yellow
+                    Write-Host "SOLUTION: Reboot the server to complete BitLocker installation" -ForegroundColor Cyan
+                    Write-Host "Then re-run this script to configure BitLocker encryption" -ForegroundColor Cyan
+                }
             }
         }
 
@@ -1710,6 +1738,8 @@ try {
             $tpm = Get-WmiObject -Namespace "Root\CIMv2\Security\MicrosoftTpm" -Class Win32_Tpm -ErrorAction SilentlyContinue
             if ($tpm) {
                 # Create directory for recovery keys
+                # WARNING: Storing on the OS drive means keys are inaccessible if BitLocker locks the system
+                # Consider backing up to Active Directory, Azure AD, or external storage after setup
                 $recoveryKeyPath = "$env:SystemDrive\BitLocker-Recovery-Keys"
                 if (!(Test-Path $recoveryKeyPath)) {
                     New-Item -Path $recoveryKeyPath -ItemType Directory -Force | Out-Null
@@ -1754,7 +1784,10 @@ Recovery Password: $recoveryPassword
 
                     Write-Host "BitLocker enabled on OS drive" -ForegroundColor Green
                     Write-Host "  Recovery password saved to: $recoveryFile" -ForegroundColor Cyan
-                    Write-LogProgress "  Recovery Password: $recoveryPassword" "Info"
+                    Write-LogProgress "  Recovery password saved to file (not logged for security)" "Info"
+                    Write-Host ""
+                    Write-Host "  IMPORTANT: Back up recovery keys to external storage or Active Directory!" -ForegroundColor Yellow
+                    Write-Host "  Keys stored on OS drive will be inaccessible if BitLocker locks the system." -ForegroundColor Yellow
                 } else {
                     Write-Host "BitLocker already enabled on OS drive" -ForegroundColor Green
                 }
@@ -1824,7 +1857,7 @@ Auto-Unlock: Enabled (TPM)
                         Write-Host "BitLocker enabled on $($volume.MountPoint)" -ForegroundColor Green
                         Write-Host "  Auto-unlock enabled via TPM" -ForegroundColor Green
                         Write-Host "  Recovery password saved to: $recoveryFile" -ForegroundColor Cyan
-                        Write-LogProgress "  Recovery Password: $dataRecoveryPassword" "Info"
+                        Write-LogProgress "  Recovery password saved to file (not logged for security)" "Info"
                     }
                 }
 
@@ -1832,7 +1865,11 @@ Auto-Unlock: Enabled (TPM)
                     Write-Host ""
                     Write-Host "IMPORTANT: BitLocker recovery passwords saved to:" -ForegroundColor Yellow
                     Write-Host "  $recoveryFile" -ForegroundColor Yellow
-                    Write-Host "Store this file securely - you'll need it to recover encrypted drives!" -ForegroundColor Yellow
+                    Write-Host ""
+                    Write-Host "WARNING: This file is on the encrypted OS drive!" -ForegroundColor Red
+                    Write-Host "  - Back up to external storage, Active Directory, or Azure AD immediately" -ForegroundColor Yellow
+                    Write-Host "  - Keys on the OS drive will be inaccessible if BitLocker locks the system" -ForegroundColor Yellow
+                    Write-Host "  - Use 'Backup-BitLockerKeyProtector' to back up to AD/Azure AD" -ForegroundColor Gray
                 }
             } else {
                 Write-Host "No TPM detected - skipping BitLocker" -ForegroundColor Yellow
@@ -1880,7 +1917,7 @@ Auto-Unlock: Enabled (TPM)
     Write-Host ""
 
     Write-Host "Next Steps:" -ForegroundColor Cyan
-    Write-Host "  1. Configure Windows Firewall rules"
+    Write-Host "  1. Review Windows Firewall rules (firewall is re-enabled)"
     Write-Host "  2. Join to domain if required"
     Write-Host "  3. Install additional Hyper-V management tools"
     Write-Host "  4. Create virtual machines"
@@ -1912,5 +1949,9 @@ Auto-Unlock: Enabled (TPM)
     Write-Host "Please review the log file: $LogFile" -ForegroundColor Yellow
     exit 1
 } finally {
+    # Re-enable Windows Firewall before script exits (security best practice)
+    Write-Host "Re-enabling Windows Firewall..." -ForegroundColor Cyan
+    Set-NetFirewallProfile -Profile Domain, Public, Private -Enabled True
+    Write-LogProgress "Windows Firewall re-enabled" "Success"
     Stop-Transcript
 }
